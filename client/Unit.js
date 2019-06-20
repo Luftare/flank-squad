@@ -5,10 +5,10 @@ export default class Unit {
     this.selected = false;
     this.health = 100;
     this.team = team;
-    this.radius = 8;
+    this.radius = 5;
     this.position = new Vector(position);
-    this.angularVelocity = 2;
-    this.speed = 20;
+    this.angularVelocity = 1;
+    this.speed = 5;
     this.direction = new Vector(1, 0);
     this.path = [];
     this.lastPathPoint = position.clone();
@@ -91,8 +91,9 @@ export default class Unit {
   drawPath(paint) {
     paint.path({
       points: [this.position, ...this.path],
-      lineWidth: 3,
-      stroke: 'yellow'
+      lineWidth: 1,
+      stroke: 'yellow',
+      alpha: this.selected ? 1 : 0.2,
     });
   }
 

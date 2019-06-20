@@ -72,7 +72,7 @@ export default class Game {
           unit.selected = false;
         });
 
-        const selectedUnits = this.getUnitsInsideSelectionRect();
+        const selectedUnits = this.getUnitsInsideSelectionRect().filter(unit => unit.team === 0);
 
         if (selectedUnits.length > 0) {
           selectedUnits.forEach(unit => {
@@ -81,7 +81,7 @@ export default class Game {
         } else {
           const mousePosition = this.selectionRect.position.clone().add(this.selectionRect.dimensions);
           const clickedUnit = this.state.units.find(unit => unit.position.distance(mousePosition) < unit.radius);
-          if (clickedUnit) {
+          if (clickedUnit && selectedUnit.team === 0) {
             clickedUnit.selected = true;
           }
         }
