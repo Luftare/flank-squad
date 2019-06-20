@@ -1,12 +1,6 @@
 import './styles.scss';
-import './CanvasInput';
-import CanvasInput from './CanvasInput';
+import Game from './Game';
 
-const canvas = document.getElementById('game');
+const game = new Game();
 
-const canvasInput = new CanvasInput(canvas);
-
-canvasInput.on(CanvasInput.MOUSE_MOVE, (point, event) => {
-
-});
-
+game.start();
