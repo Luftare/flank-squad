@@ -23,10 +23,16 @@ export default class Game {
         const selectedUnits = this.state.units.filter(unit => unit.selected);
         if (selectedUnits.length === 0) return;
         const averatePosition = selectedUnits.reduce((sum, unit) => sum.add(unit.position), new Vector()).scale(1 / selectedUnits.length);
+        const shouldAssault = this.canvasInput.keysDown.a;
 
         selectedUnits.forEach(unit => {
           const offset = unit.position.clone().substract(averatePosition);
           unit.path = [gameCoord.clone().add(offset)];
+          unit.assaulting = shouldAssault;
+
+          if (!shouldAssault) {
+            unit.target = null;
+          }
         });
       }
 
@@ -46,8 +52,6 @@ export default class Game {
         if (selectedUnits.length === 0) return;
 
         const averatePosition = selectedUnits.reduce((sum, unit) => sum.add(unit.position), new Vector()).scale(1 / selectedUnits.length);
-
-
 
         selectedUnits.forEach(unit => {
           const offset = unit.position.clone().substract(averatePosition);
@@ -128,12 +132,17 @@ export default class Game {
         new Unit(new Vector(16, 55), 0),
         new Unit(new Vector(85, 66), 0),
         new Unit(new Vector(45, 5), 0),
+        new Unit(new Vector(200, -155), 0),
         new Unit(new Vector(100, -100), 1),
+        new Unit(new Vector(-20, -20), 1),
+        new Unit(new Vector(-50, -10), 1),
+        new Unit(new Vector(100, 100), 1),
       ],
     }
   }
 
   update(dt) {
+    this.state.units = this.state.units.filter(unit => unit.health > 0);
     this.state.units.forEach(unit => unit.update(dt, this));
     this.canvasInput.reset();
   }

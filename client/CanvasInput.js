@@ -12,12 +12,22 @@ export default class CanvasInput {
       released: {},
     };
 
+    this.keysDown = {};
+
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
 
     window.addEventListener('resize', () => {
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
+    });
+
+    window.addEventListener('keydown', ({ key }) => {
+      this.keysDown[key.toLowerCase()] = true;
+    });
+
+    window.addEventListener('keyup', ({ key }) => {
+      this.keysDown[key.toLowerCase()] = false;
     });
 
     canvas.addEventListener(CanvasInput.MOUSE_DOWN, (e) => {
