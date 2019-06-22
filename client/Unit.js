@@ -6,6 +6,9 @@ export default class Unit {
     this.selected = false;
     this.target = null;
     this.lastTargetAcqisitionTime = 0;
+    this.lastShotTime = 0;
+    this.shotTimeoutDuration = 300;
+    this.maxDamage = 40;
     this.health = 100;
     this.team = team;
     this.radius = 5;
@@ -22,6 +25,7 @@ export default class Unit {
     this.updateDirection(dt, game);
     this.handlePathPointReaching();
     this.flockMove(dt, game);
+    this.restoreHealth(dt, game);
   }
 
   setTarget(unit) {
@@ -87,8 +91,6 @@ export default class Unit {
     const withinRange = distance <= this.range;
     if (!withinRange) return Infinity;
     const angle = this.direction.angleBetween(toTarget);
-    const isFacingAtTarget = angle < Math.PI * 0.4;
-    if (!isFacingAtTarget) return Infinity;
     return angle * 30 + distance;
   }
 
@@ -96,11 +98,14 @@ export default class Unit {
     const toTarget = this.target.position.clone().substract(this.position);
     const facingDelta = toTarget.angleBetween(this.direction);
     const aimingTarget = facingDelta < 0.1;
+    const gunLoaded = Date.now() - this.lastShotTime > this.shotTimeoutDuration;
+    const shouldShoot = aimingTarget && gunLoaded;
 
-    if (aimingTarget) {
+    if (shouldShoot) {
       const distance = toTarget.length;
-      const damage = (Math.random() ** (distance / this.range)) * 100;
-      this.target.health -= damage * dt;
+      const damage = (Math.random() ** (distance / this.range)) * this.maxDamage;
+      this.target.health -= damage;
+      this.lastShotTime = Date.now();
     }
   }
 
@@ -185,6 +190,10 @@ export default class Unit {
     if (pointReached) {
       this.path.shift();
     }
+  }
+
+  restoreHealth(dt) {
+    this.health = Math.min(100, this.health + 2 * dt);
   }
 
   drawPath(paint) {
