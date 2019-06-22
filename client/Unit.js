@@ -109,8 +109,10 @@ export default class Unit {
   }
 
   updateDirection(dt, game) {
-    if (this.target) {
-      const toTarget = this.target.position.clone().substract(this.position);
+    const targetPoint = this.target && this.target.position || this.path[0];
+
+    if (targetPoint) {
+      const toTarget = targetPoint.clone().substract(this.position);
       const facingDelta = toTarget.angleBetween(this.direction);
       const shouldRotateTowardsPoint = facingDelta > 0.03;
 
@@ -120,26 +122,6 @@ export default class Unit {
       } else {
         this.direction.alignWith(toTarget);
       }
-      return;
-    }
-
-    if (this.path.length > 0) {
-      this.rotateTowardsNextPathPoint(dt, game);
-    }
-  }
-
-  rotateTowardsNextPathPoint(dt, game) {
-    const nextPoint = this.path[0];
-
-    const toNextPoint = nextPoint.clone().substract(this.position);
-    const facingDelta = toNextPoint.angleBetween(this.direction);
-    const shouldRotateTowardsPoint = facingDelta > 0.03;
-
-    if (shouldRotateTowardsPoint) {
-      const clockWise = this.direction.clone().normalize().cross(toNextPoint.clone().normalize()) > 0;
-      this.direction.lerpAlignFixed(dt * this.angularVelocity, clockWise, toNextPoint);
-    } else {
-      this.direction.alignWith(toNextPoint);
     }
   }
 
