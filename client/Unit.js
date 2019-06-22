@@ -8,7 +8,7 @@ export default class Unit {
     this.lastTargetAcqisitionTime = 0;
     this.lastShotTime = 0;
     this.shotTimeoutDuration = 300;
-    this.maxDamage = 40;
+    this.maxDamage = 20;
     this.health = 100;
     this.team = team;
     this.radius = 5;
@@ -31,7 +31,6 @@ export default class Unit {
   setTarget(unit) {
     this.target = unit;
     this.lastTargetAcqisitionTime = Date.now();
-    this.path = [];
   }
 
   updateTarget(dt, game) {
@@ -155,7 +154,10 @@ export default class Unit {
     let seekForce = nextPoint ? nextPoint.clone().substract(this.position).toLength(3) : new Vector();
 
     force.add(avoidForce);
-    force.add(seekForce);
+
+    if (!this.target) {
+      force.add(seekForce);
+    }
 
     if (force.length > 0) {
       force.toLength(this.speed);
