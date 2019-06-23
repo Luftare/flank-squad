@@ -10,8 +10,8 @@ export default class Unit {
     this.target = null;
     this.lastTargetAcqisitionTime = 0;
     this.lastShotTime = 0;
-    this.shotTimeoutDuration = 300;
-    this.maxDamage = 50;
+    this.shotTimeoutDuration = 500;
+    this.damage = 50;
     this.health = 100;
     this.team = team;
     this.radius = 5;
@@ -109,15 +109,16 @@ export default class Unit {
     const toTarget = this.target.position.clone().substract(this.position);
     const facingDelta = toTarget.angleBetween(this.direction);
     const aimingTarget = facingDelta < 0.02;
-    const gunLoaded = Date.now() - this.lastShotTime > this.shotTimeoutDuration;
-    const shouldShoot = aimingTarget && gunLoaded;
+    const timeSinceLastShot = Date.now() - this.lastShotTime;
+    const distance = toTarget.length;
+    const aimTime = this.shotTimeoutDuration * (1 + distance / this.range);
+    const shotAimed = timeSinceLastShot > aimTime;
+    const shouldShoot = aimingTarget && shotAimed;
 
     if (shouldShoot) {
-      const distance = toTarget.length;
-      const distanceFactor = 4 * distance / this.range;
-      const damage = this.maxDamage * (Math.random() ** distanceFactor);
-      (Math.random() ** (2 * distance / this.range)) * this.maxDamage;
-      this.target.health -= damage;
+      const damage = Math.random() > 0.8 ? this.damage * 2 : this.damage;
+      const randomizedDamage = damage * (Math.random() * 0.5 + 0.5);
+      this.target.health -= randomizedDamage;
       this.lastShotTime = Date.now();
     }
   }
