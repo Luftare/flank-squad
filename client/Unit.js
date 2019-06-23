@@ -98,6 +98,11 @@ export default class Unit {
     return angle * 30 + distance;
   }
 
+  isValidPathTarget(point, game, fromCurrentPosition = false) {
+    const from = !fromCurrentPosition && this.path[this.path.length - 1] || this.position;
+    return !game.state.waters.some(water => water.segmentIntersects(from, point));
+  }
+
   requestShootTarget(dt, game) {
     const toTarget = this.target.position.clone().substract(this.position);
     const facingDelta = toTarget.angleBetween(this.direction);

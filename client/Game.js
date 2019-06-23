@@ -28,8 +28,11 @@ export default class Game {
 
         selectedUnits.forEach(unit => {
           const offset = unit.position.clone().substract(averatePosition);
-          unit.path = [gameCoord.clone().add(offset)];
-          unit.assaulting = shouldAssault;
+          const nextPathPoint = gameCoord.clone().add(offset);
+          if (unit.isValidPathTarget(nextPathPoint, this, true)) {
+            unit.path = [nextPathPoint];
+            unit.assaulting = shouldAssault;
+          }
 
           if (!shouldAssault) {
             unit.target = null;
@@ -58,7 +61,8 @@ export default class Game {
           const offset = unit.position.clone().substract(averatePosition);
           const lastPoint = unit.path[unit.path.length - 1];
           const newPathPoint = gameCoord.clone().add(offset);
-          const shouldPushPoint = !lastPoint || lastPoint.distance(newPathPoint) > 20;
+          const enoughDistanceFromPreviousPoint = !lastPoint || lastPoint.distance(newPathPoint) > 20;
+          const shouldPushPoint = enoughDistanceFromPreviousPoint && unit.isValidPathTarget(newPathPoint, this);
 
           if (shouldPushPoint) {
             unit.path.push(newPathPoint)
@@ -154,6 +158,14 @@ export default class Game {
     canvas.width = canvas.width;
 
     ctx.translate(canvas.clientWidth * 0.5, canvas.clientHeight * 0.5);
+
+    this.state.waters.forEach(polygon => {
+      this.paint.path({
+        points: polygon.nodes,
+        fill: 'blue',
+        closePath: true
+      })
+    });
 
     this.state.units.filter(unit => unit.team === 0).forEach(unit => unit.drawPath(this.paint));
     this.state.units.forEach(unit => unit.drawFlash(this.paint));
