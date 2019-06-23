@@ -18,7 +18,7 @@ export default class Unit {
     this.range = 250;
     this.position = new Vector(position);
     this.angularVelocity = 1;
-    this.speed = 10;
+    this.speed = 50;
     this.direction = new Vector(1, 0);
     this.path = [];
   }
@@ -28,6 +28,7 @@ export default class Unit {
     this.updateDirection(dt, game);
     this.handlePathPointReaching();
     this.flockMove(dt, game);
+    this.avoidObstacles(dt, game);
     this.restoreHealth(dt, game);
     this.updateVisibility(dt, game);
   }
@@ -74,7 +75,7 @@ export default class Unit {
 
     game.state.units.forEach(unit => {
       if (unit.team === this.team) return;
-      const cost = this.getTargetCost(unit);
+      const cost = this.getTargetCost(unit, game);
 
       if (cost < minTargetCost) {
         minTargetCost = cost;
@@ -87,20 +88,21 @@ export default class Unit {
     }
   }
 
-  getTargetCost(unit) {
+  getTargetCost(unit, game) {
     if (!unit.spotted) return Infinity;
     const toTarget = unit.position.clone().substract(this.position);
     const distance = toTarget.length;
     if (unit.target === this) return distance * 0.1;
     const withinRange = distance <= this.range;
     if (!withinRange) return Infinity;
+    if (!this.hasLineOfSightToUnit(unit, game)) return Infinity;
     const angle = this.direction.angleBetween(toTarget);
     return angle * 30 + distance;
   }
 
   isValidPathTarget(point, game, fromCurrentPosition = false) {
     const from = !fromCurrentPosition && this.path[this.path.length - 1] || this.position;
-    return ![...game.state.waters, ...game.state.buildings].some(polygon => polygon.segmentIntersects(from, point));
+    return ![...game.state.waters, ...game.state.buildings].some(({ polygon }) => polygon.segmentIntersects(from, point));
   }
 
   requestShootTarget(dt, game) {
@@ -145,9 +147,7 @@ export default class Unit {
     const avoidForce = shouldAvoid ? this.position.clone().substract(closestUnit.position).toLength(1) : new Vector();
     let seekForce = nextPoint ? nextPoint.clone().substract(this.position).toLength(1) : new Vector();
 
-    if (this.path.length > 0) {
-      force.add(avoidForce);
-    }
+    force.add(avoidForce);
 
     if (!this.target) {
       force.add(seekForce);
@@ -188,6 +188,15 @@ export default class Unit {
     }
   }
 
+  avoidObstacles(dt, game) {
+    const obstacle = [...game.state.buildings, ...game.state.waters].find(obstacle => obstacle.pointInside(this.position));
+
+    if (obstacle) {
+      const avoidVector = this.position.clone().substract(obstacle.center).toLength(this.radius);
+      this.position.add(avoidVector);
+    }
+  }
+
   restoreHealth(dt) {
     this.health = Math.min(100, this.health + 2 * dt);
   }
@@ -202,8 +211,10 @@ export default class Unit {
       const isFacingSelf = unit.direction.angleBetween(toSelf) < Math.PI * 0.4;
       if (!isFacingSelf) return false;
       const distance = this.position.distance(unit.position);
+      if (distance > shootingSpotDistance) return false;
       const shotRecently = Date.now() - this.lastShotTime < 1000;
-
+      const hasLineOfSight = unit.hasLineOfSightToUnit(this, game);
+      if (!hasLineOfSight) return false;
       if (shotRecently && distance < shootingSpotDistance) return true;
       if (this.path.length > 0 && distance < movingSpotDistance) return true;
       if (distance < stationarySpotDistance) return true;
@@ -212,6 +223,10 @@ export default class Unit {
     if (this.spotted) {
       this.lastSpottedTime = Date.now();
     }
+  }
+
+  hasLineOfSightToUnit(unit, game) {
+    return !game.state.buildings.some(building => building.polygon.segmentIntersects(unit.position, this.position))
   }
 
   drawPath(paint) {

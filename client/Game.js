@@ -3,7 +3,7 @@ import Loop from 'loop';
 import Unit from "./Unit";
 import Vector from "Vector";
 import Paint from 'paint';
-import Polygon from "./Polygon";
+import Obstacle from "./Obstacle";
 
 export default class Game {
   constructor() {
@@ -137,7 +137,7 @@ export default class Game {
         new Unit(new Vector(280, -150), 1)
       ],
       waters: [
-        new Polygon([
+        new Obstacle([
           new Vector(-200, 0),
           new Vector(-300, 100),
           new Vector(-300, 150),
@@ -145,7 +145,7 @@ export default class Game {
         ])
       ],
       buildings: [
-        new Polygon([
+        new Obstacle([
           new Vector(200, -50),
           new Vector(300, -50),
           new Vector(300, -100),
@@ -167,17 +167,17 @@ export default class Game {
 
     ctx.translate(canvas.clientWidth * 0.5, canvas.clientHeight * 0.5);
 
-    this.state.waters.forEach(polygon => {
+    this.state.waters.forEach(water => {
       this.paint.path({
-        points: polygon.nodes,
+        points: water.polygon.nodes,
         fill: 'blue',
         closePath: true
       })
     });
 
-    this.state.buildings.forEach(polygon => {
+    this.state.buildings.forEach(building => {
       this.paint.path({
-        points: polygon.nodes,
+        points: building.polygon.nodes,
         fill: 'black',
         closePath: true
       })
