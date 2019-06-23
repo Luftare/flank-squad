@@ -134,7 +134,7 @@ export default class Game {
       units: [
         ...[...Array(5)].map((_, i) => new Unit(new Vector(i * 50, 0), 0)),
         ...[...Array(5)].map((_, i) => new Unit(new Vector(i * 50, 50), 0)),
-        new Unit(new Vector(0, -260), 1)
+        new Unit(new Vector(280, -150), 1)
       ],
       waters: [
         new Polygon([
@@ -142,6 +142,14 @@ export default class Game {
           new Vector(-300, 100),
           new Vector(-300, 150),
           new Vector(-200, 100),
+        ])
+      ],
+      buildings: [
+        new Polygon([
+          new Vector(200, -50),
+          new Vector(300, -50),
+          new Vector(300, -100),
+          new Vector(200, -100),
         ])
       ]
     }
@@ -163,6 +171,14 @@ export default class Game {
       this.paint.path({
         points: polygon.nodes,
         fill: 'blue',
+        closePath: true
+      })
+    });
+
+    this.state.buildings.forEach(polygon => {
+      this.paint.path({
+        points: polygon.nodes,
+        fill: 'black',
         closePath: true
       })
     });

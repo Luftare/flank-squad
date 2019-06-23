@@ -100,7 +100,7 @@ export default class Unit {
 
   isValidPathTarget(point, game, fromCurrentPosition = false) {
     const from = !fromCurrentPosition && this.path[this.path.length - 1] || this.position;
-    return !game.state.waters.some(water => water.segmentIntersects(from, point));
+    return ![...game.state.waters, ...game.state.buildings].some(polygon => polygon.segmentIntersects(from, point));
   }
 
   requestShootTarget(dt, game) {
@@ -143,9 +143,11 @@ export default class Unit {
 
     const force = new Vector();
     const avoidForce = shouldAvoid ? this.position.clone().substract(closestUnit.position).toLength(1) : new Vector();
-    let seekForce = nextPoint ? nextPoint.clone().substract(this.position).toLength(3) : new Vector();
+    let seekForce = nextPoint ? nextPoint.clone().substract(this.position).toLength(1) : new Vector();
 
-    force.add(avoidForce);
+    if (this.path.length > 0) {
+      force.add(avoidForce);
+    }
 
     if (!this.target) {
       force.add(seekForce);
