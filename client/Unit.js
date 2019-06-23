@@ -1,5 +1,4 @@
 import Vector from "Vector";
-import { isContext } from "vm";
 
 export default class Unit {
   constructor(position, team) {
@@ -10,15 +9,15 @@ export default class Unit {
     this.target = null;
     this.lastTargetAcqisitionTime = 0;
     this.lastShotTime = 0;
-    this.shotTimeoutDuration = 500;
-    this.damage = 50;
+    this.shotTimeoutDuration = 300;
+    this.damage = 20;
     this.health = 100;
     this.team = team;
     this.radius = 5;
     this.range = 250;
     this.position = new Vector(position);
     this.angularVelocity = 1;
-    this.speed = 50;
+    this.speed = 15;
     this.direction = new Vector(1, 0);
     this.path = [];
   }
@@ -146,7 +145,7 @@ export default class Unit {
 
     const force = new Vector();
     const avoidForce = shouldAvoid ? this.position.clone().substract(closestUnit.position).toLength(1) : new Vector();
-    let seekForce = nextPoint ? nextPoint.clone().substract(this.position).toLength(1) : new Vector();
+    let seekForce = nextPoint ? nextPoint.clone().substract(this.position).toLength(3) : new Vector();
 
     force.add(avoidForce);
 
@@ -203,14 +202,13 @@ export default class Unit {
   }
 
   updateVisibility(dt, game) {
-    const stationarySpotDistance = 100;
+    const stationarySpotDistance = 150;
     const movingSpotDistance = 200;
-    const shootingSpotDistance = 400;
+    const shootingSpotDistance = 500;
 
     this.spotted = game.state.units.filter(unit => unit.team !== this.team).some(unit => {
       const toSelf = this.position.clone().substract(unit.position);
       const isFacingSelf = unit.direction.angleBetween(toSelf) < Math.PI * 0.4;
-      if (!isFacingSelf) return false;
       const distance = this.position.distance(unit.position);
       if (distance > shootingSpotDistance) return false;
       const shotRecently = Date.now() - this.lastShotTime < 1000;
@@ -218,7 +216,7 @@ export default class Unit {
       if (!hasLineOfSight) return false;
       if (shotRecently && distance < shootingSpotDistance) return true;
       if (this.path.length > 0 && distance < movingSpotDistance) return true;
-      if (distance < stationarySpotDistance) return true;
+      if (isFacingSelf && distance < stationarySpotDistance) return true;
     });
 
     if (this.spotted) {

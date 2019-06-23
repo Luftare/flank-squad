@@ -159,6 +159,17 @@ export default class Game {
     this.state.units = this.state.units.filter(unit => unit.health > 0);
     this.state.units.forEach(unit => unit.update(dt, this));
     this.canvasInput.reset();
+
+    if (this.state.units.filter(unit => unit.team === 0).length < 10) {
+      this.state.units.push(new Unit(new Vector(0, 300), 0));
+    }
+
+    if (this.state.units.filter(unit => unit.team === 1).length < 10) {
+      const unit = new Unit(new Vector(Math.random() * 100 - 50, -300), 1);
+      unit.assaulting = true;
+      unit.path = [new Vector(Math.random() * 50 - 25, 0), new Vector(0, 300)];
+      this.state.units.push(unit);
+    }
   }
 
   render() {
