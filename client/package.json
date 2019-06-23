@@ -3,19 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "dev": "parcel index.html"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "loop": "github:Luftare/Loop",
     "paint": "github:Luftare/Paint",
     "parcel": "^1.12.3",
     "vector": "github:Luftare/Vector"
   },
-  "devDependencies": {
-    "sass": "^1.21.0"
-  }
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

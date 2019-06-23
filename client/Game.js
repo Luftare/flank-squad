@@ -3,6 +3,7 @@ import Loop from 'loop';
 import Unit from "./Unit";
 import Vector from "Vector";
 import Paint from 'paint';
+import Polygon from "./Polygon";
 
 export default class Game {
   constructor() {
@@ -85,7 +86,7 @@ export default class Game {
         } else {
           const mousePosition = this.selectionRect.position.clone().add(this.selectionRect.dimensions);
           const clickedUnit = this.state.units.find(unit => unit.position.distance(mousePosition) < unit.radius);
-          if (clickedUnit && selectedUnit.team === 0) {
+          if (clickedUnit && clickedUnit.team === 0) {
             clickedUnit.selected = true;
           }
         }
@@ -127,17 +128,18 @@ export default class Game {
   getInitState() {
     return {
       units: [
-        new Unit(new Vector(0, 0), 0),
-        new Unit(new Vector(14, 25), 0),
-        new Unit(new Vector(16, 55), 0),
-        new Unit(new Vector(85, 66), 0),
-        new Unit(new Vector(45, 5), 0),
-        new Unit(new Vector(200, -155), 0),
-        new Unit(new Vector(100, -100), 1),
-        new Unit(new Vector(-20, -20), 1),
-        new Unit(new Vector(-50, -10), 1),
-        new Unit(new Vector(100, 100), 1),
+        ...[...Array(5)].map((_, i) => new Unit(new Vector(i * 50, 0), 0)),
+        ...[...Array(5)].map((_, i) => new Unit(new Vector(i * 50, 50), 0)),
+        new Unit(new Vector(0, -260), 1)
       ],
+      waters: [
+        new Polygon([
+          new Vector(-200, 0),
+          new Vector(-300, 100),
+          new Vector(-300, 150),
+          new Vector(-200, 100),
+        ])
+      ]
     }
   }
 
@@ -153,7 +155,8 @@ export default class Game {
 
     ctx.translate(canvas.clientWidth * 0.5, canvas.clientHeight * 0.5);
 
-    this.state.units.forEach(unit => unit.drawPath(this.paint));
+    this.state.units.filter(unit => unit.team === 0).forEach(unit => unit.drawPath(this.paint));
+    this.state.units.forEach(unit => unit.drawFlash(this.paint));
     this.state.units.forEach(unit => unit.draw(this.paint));
 
     this.paint.rect({
@@ -162,6 +165,6 @@ export default class Game {
       height: this.selectionRect.dimensions.y,
       fill: '#fff',
       alpha: 0.3
-    })
+    });
   }
 }
