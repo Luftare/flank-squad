@@ -6,7 +6,7 @@
   "dependencies": {
     "loop": "github:Luftare/Loop",
     "paint": "github:Luftare/Paint",
-    "parcel": "^1.12.3",
+    "parcel": "^2.8.2",
     "vector": "github:Luftare/Vector"
   },
   "devDependencies": {
